@@ -42,10 +42,16 @@ public class CmdPlayer {
             return;
         }
 
+		// Get the ID from the first element
+		String playerIdString = args[0];
+
+		// Create a new array without the first element and re-assign it to 'args'
+		args = Arrays.copyOfRange(args, 1, args.length);
+
         Player currentPlayer;
         try {
             // 2. Parse the ID, handling potential non-numeric input.
-            int playerId = Integer.parseInt(args[0]);
+            int playerId = Integer.parseInt(playerIdString);
             currentPlayer = getPlayerById(playerId);
 
         } catch (NumberFormatException e) {
