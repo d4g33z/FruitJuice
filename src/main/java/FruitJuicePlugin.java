@@ -155,6 +155,7 @@ public class FruitJuicePlugin extends JavaPlugin implements Listener {
 		return null;
 	}
 
+
 	public Player getHostPlayer() {
 		if (hostPlayer != null) return hostPlayer;
 		for (Player player : Bukkit.getOnlinePlayers()) {

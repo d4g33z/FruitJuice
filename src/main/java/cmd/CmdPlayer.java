@@ -18,59 +18,54 @@ public class CmdPlayer {
         this.plugin = plugin;
     }
 
-	private boolean serverHasPlayer() {
-		return !Bukkit.getOnlinePlayers().isEmpty();
-	}
+	 /**
+     * Finds a player on the server by their entity ID.
+     *
+     * @param id The entity ID of the player.
+     * @return The Player object if found, otherwise null.
+     */
+    private Player getPlayerById(int id) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getEntityId() == id) {
+                return player;
+            }
+        }
+        return null; // Return null if no player with the given ID is found.
+    }
 
-	private Player getCurrentPlayer() {
-		// if no players, return null
-		if (!serverHasPlayer()) {
-			session.send("Fail,There are no players in the server.");
-			return null;
-		} 
+   public void execute(String command, String[] args) {
+        // --- Start of Recommended Fix ---
 
-		// if the player hasnt already been retreived for this session, go and get it.
-		Player player = attachedPlayer;
-		if (player == null) {
-			player = plugin.getHostPlayer();
-			attachedPlayer = player;
-			return player;
-		}
+        // 1. Check if the required ID argument was provided.
+        if (args.length == 0) {
+            session.send("Fail,Required player ID argument is missing.");
+            return;
+        }
 
-		// otherwise, return the player
-		return player;
-	}
+		// Get the ID from the first element
+		String playerIdString = args[0];
 
-	private Player getCurrentPlayer(String name) {
+		// Create a new array without the first element and re-assign it to 'args'
+		args = Arrays.copyOfRange(args, 1, args.length);
 
-		// if no players, return null
-		if (!serverHasPlayer()) {
-			session.send("Fail,There are no players in the server.");
-			return null;
-		} 
+        Player currentPlayer;
+        try {
+            // 2. Parse the ID, handling potential non-numeric input.
+            int playerId = Integer.parseInt(playerIdString);
+            currentPlayer = getPlayerById(playerId);
 
-		// if a named player is returned use that
-		Player player = plugin.getNamedPlayer(name);
-		if (player == null) {
-			player = attachedPlayer;
-			// otherwise go and get the host player and make that the attached player
-			if (player == null) {
-				player = plugin.getHostPlayer();
-			}
-		}
-		attachedPlayer = player;
-		return player;
-	}
+        } catch (NumberFormatException e) {
+            session.send("Fail,Invalid player ID format. ID must be an integer.");
+            return;
+        }
 
-    public void execute(String command, String[] args) {
-
-		Player currentPlayer = getCurrentPlayer();
-		if (currentPlayer == null) {
-			session.send("Fail,There are no players in the server.");
-			return;
-		}
-
-		// player.getTile
+        // 3. Check if a player with that ID was actually found.
+        if (currentPlayer == null) {
+            // Using args[0] here to show the user which ID failed.
+            session.send("Fail,No player found with ID: " + args[0]);
+            return;
+        }
+			// player.getTile
 		if (command.equals("getTile")) {
 
 			session.send(session.blockLocationToRelative(currentPlayer.getLocation()));
@@ -114,9 +109,8 @@ public class CmdPlayer {
 
 			// player.setPlayer
 		} else if (command.equals("setPlayer")) {
-			String playerName = args[0];
-			getCurrentPlayer(playerName);
-
+//			String playerName = args[0];
+//			getCurrentPlayer(playerName);
 			// player.setDirection
 		} else if (command.equals("setDirection")) {
 			Double x = Double.parseDouble(args[0]);
@@ -194,7 +188,7 @@ public class CmdPlayer {
 			currentPlayer.sendTitle(title, subTitle, fadeIn, stay, fadeOut);
 
 		} else {
-			session.plugin.getLogger().warning(preFix + command + " is not supported.");
+//			session.plugin.getLogger().warning(preFix + command + " is not supported.");
 			session.send("Fail," + preFix + command + " is not supported.");
 		}
 	}
