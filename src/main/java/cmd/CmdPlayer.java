@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import java.util.Arrays;
+
 public class CmdPlayer {
     private final String preFix = "player.";
     private RemoteSession session;
@@ -113,14 +115,26 @@ public class CmdPlayer {
 //			getCurrentPlayer(playerName);
 			// player.setDirection
 		} else if (command.equals("setDirection")) {
-			Double x = Double.parseDouble(args[0]);
-			Double y = Double.parseDouble(args[1]);
-			Double z = Double.parseDouble(args[2]);
+            try {
+                Double x = Double.parseDouble(args[0]);
+                Double y = Double.parseDouble(args[1]);
+                Double z = Double.parseDouble(args[2]);
 
-			Location loc = currentPlayer.getLocation();
-			loc.setDirection(new Vector(x, y, z));
-			currentPlayer.teleport(loc);
+                Location loc = currentPlayer.getLocation();
+                Vector v = new Vector(x, y, z);
 
+                // Check for zero-length vector which causes issues
+                if (v.length() == 0) {
+                    plugin.getLogger().warning("DEBUG: Vector length is 0! This defaults to East.");
+                }
+
+                loc.setDirection(v);
+                currentPlayer.teleport(loc);
+
+            } catch (Exception e) {
+                plugin.getLogger().warning("DEBUG: Error in setDirection: " + e.getMessage());
+                e.printStackTrace();
+            }
 			// player.getDirection
 		} else if (command.equals("getDirection")) {
 
